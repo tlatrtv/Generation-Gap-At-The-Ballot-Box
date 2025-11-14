@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>THE GENERATION GAP AT THE BALLOT BOX IN PRESIDENTIAL ELECTION YEARS</title>
+<style>
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:#020617;
+  color:#e5e7eb;
+}
+.header{
+  padding:24px 32px;
+  background:linear-gradient(135deg,#9333EA,#2563EB);
+  color:white;
+}
+.header-text h1{
+  margin:0 0 4px;
+  font-size:24px;
+  font-weight:700;
+}
+.header-text p{
+  margin:0;
+  font-size:14px;
+  opacity:.95;
+}
+.content{
+  padding:24px 32px 40px;
+}
+.description h2{
+  margin:0 0 4px;
+  font-size:18px;
+  font-weight:600;
+}
+.description p{
+  margin:0;
+  font-size:13px;
+  color:#d1d5db;
+  line-height:1.5;
+}
+
+/* Core chart container */
+.chart-wrapper{
+  margin-top:16px;
+  padding:16px;
+  background:#020617;
+  border-radius:12px;
+  box-shadow:0 20px 40px rgba(15,23,42,.8);
+  opacity:0;
+  transform:translateY(8px);
+  transition:opacity .7s ease, transform .7s ease;
+}
+
+/* Chart + controls layout */
+.chart-inner{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.chart-panel{
+  min-height:360px;
+}
+.chart-footer{
+  display:flex;
+  flex-wrap:wrap;
+  gap:16px;
+  align-items:flex-start;
+}
+
+/* Year spotlight / narrative card */
+.insight-panel{
+  flex:1 1 260px;
+  padding:14px 16px;
+  border-radius:10px;
+  background:#0b1220;
+  border:1px solid #1f2937;
+  font-size:13px;
+  line-height:1.5;
+}
+.insight-panel h3{
+  margin:0 0 6px;
+  font-size:14px;
+  font-weight:600;
+}
+.insight-panel p{
+  margin:0;
+}
+
+/* Playback controls */
+.controls-panel{
+  flex:1 1 260px;
+  padding:12px 14px;
+  border-radius:10px;
+  background:#020617;
+  border:1px solid #1f2937;
+  font-size:12px;
+}
+.controls-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:8px;
+}
+#play-button{
+  border:none;
+  border-radius:999px;
+  padding:6px 12px;
+  font-size:12px;
+  cursor:pointer;
+  background:linear-gradient(135deg,#9333EA,#14b8a6);
+  color:white;
+  font-weight:500;
+  box-shadow:0 8px 18px rgba(0,0,0,.5);
+}
+#play-button:hover{
+  filter:brightness(1.05);
+}
+#year-slider{
+  flex:1;
+}
+.controls-meta{
+  font-size:11px;
+  color:#9ca3af;
+}
+.controls-meta span{
+  font-weight:500;
+  color:#e5e7eb;
+}
+
+/* Static context box */
+.context-box{
+  margin-top:24px;
+  padding:16px 20px;
+  border-radius:10px;
+  background:#0b1220;
+  border:1px solid #1f2937;
+  font-size:13px;
+  line-height:1.4;
+  opacity:0;
+  transform:translateY(8px);
+  transition:opacity .7s ease, transform .7s ease;
+}
+.context-box p{
+  margin:0 0 8px;
+}
+.context-box p:last-child{
+  margin-bottom:0;
+}
+
+.disclaimer{
+  margin-top:16px;
+  font-size:11px;
+  color:#9ca3af;
+}
+.disclaimer p{
+  margin:0;
+}
+
+/* Scroll reveal */
+.revealed{
+  opacity:1 !important;
+  transform:translateY(0) !important;
+}
+
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-text">
+      <h1>THE GENERATION GAP AT THE BALLOT BOX IN PRESIDENTIAL ELECTION YEARS</h1>
+      <p>Youth vs older voter turnout in U.S. presidential elections, 1972–2024</p>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="description">
+      <h2>Turnout evolution for young and older voters</h2>
+      <p>Smooth lines show turnout rates for 18–29-year-olds and voters over 30 in presidential election years. The shaded band highlights the turnout gap between older and younger voters. Use the playback controls or hover over the chart to move through time.</p>
+    </div>
+
+    <div class="chart-wrapper" id="chart-wrapper">
+      <div class="chart-inner">
+        <div class="chart-panel">
+          <div id="turnout-chart" class="plotly-graph-div" style="height:100%; width:100%; min-height:360px;"></div>
+        </div>
+
+        <div class="chart-footer">
+          <div class="insight-panel">
+            <h3>Year spotlight</h3>
+            <p>In <span id="detail-year">2024</span>, turnout among <strong>18–29-year-olds</strong> was
+              <span id="detail-young">47%</span>, compared with <strong>68%</strong> for voters
+              <strong>over 30</strong>. The turnout gap was about <span id="detail-gap">21 percentage points</span>.</p>
+          </div>
+
+          <div class="controls-panel">
+            <div class="controls-row">
+              <button id="play-button">Play timeline</button>
+              <input type="range" id="year-slider" min="0" max="13" step="1" value="13"/>
+            </div>
+            <div class="controls-meta">
+              <div>Selected year: <span id="selected-year-label">2024</span></div>
+              <div>Tip: Hover the chart or drag the slider to move along the timeline.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="context-box" id="context-box">
+      <p><strong>Insight:</strong> Across presidential elections since 1972, young voters have consistently turned out well behind older voters. The gap peaked around 1988 at roughly 25 points and was tightest in 1972 at about 15 points. In 2024, the gap sits near 21 points, reinforcing that the youth turnout deficit remains a structural feature of U.S. elections.</p>
+    </div>
+
+    <div class="disclaimer">
+      <p>Note: Turnout rates represent the share of each age group that voted in presidential elections.</p>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    window.PlotlyConfig = {MathJaxConfig: 'local'};
+  </script>
+  <script src="https://cdn.plot.ly/plotly-2.4.1.min.js"></script>
+  <script>
+    // --- Data (same as your original chart) ---
+    const years = [1972,1976,1980,1984,1988,1992,1996,2000,2004,2008,2012,2016,2020,2024];
+    const turnoutOver30 = [0.70,0.67,0.71,0.71,0.69,0.72,0.64,0.65,0.68,0.67,0.66,0.65,0.65,0.68];
+    const turnout1829   = [0.55,0.49,0.48,0.49,0.44,0.52,0.40,0.40,0.49,0.51,0.45,0.46,0.50,0.47];
+    const gap           = turnoutOver30.map((v,i)=>v - turnout1829[i]);
+
+    // default marker sizes (will be overridden per selected year)
+    function baseSizes(len, highlightIndex){
+      return Array.from({length:len}, (_,i)=> i === highlightIndex ? 9 : 6);
+    }
+    function baseSizesGap(len, highlightIndex){
+      return Array.from({length:len}, (_,i)=> i === highlightIndex ? 8 : 5);
+    }
+
+    const latestIndex = years.length - 1;
+
+    const traceOver30 = {
+      x: years,
+      y: turnoutOver30,
+      type: "scatter",
+      mode: "lines+markers",
+      name: "Over 30 turnout",
+      line: { color:"#14b8a6", shape:"spline", width:2.5 },
+      marker: { color:"#14b8a6", size: baseSizes(years.length, latestIndex) },
+      hovertemplate: "Year %{x}<br>Over 30: %{y:.0%}<extra></extra>"
+    };
+
+    const traceYoung = {
+      x: years,
+      y: turnout1829,
+      type: "scatter",
+      mode: "lines+markers",
+      name: "18–29 turnout",
+      line: { color:"#9333EA", shape:"spline", width:2.5 },
+      marker: { color:"#9333EA", size: baseSizes(years.length, latestIndex) },
+      fill: "tonexty",
+      fillcolor:"rgba(147,51,234,0.18)",
+      hovertemplate: "Year %{x}<br>18–29: %{y:.0%}<extra></extra>"
+    };
+
+    const traceGap = {
+      x: years,
+      y: gap,
+      type: "scatter",
+      mode: "lines+markers",
+      name: "Turnout gap (30+ minus 18–29)",
+      line: { color:"#e5e7eb", dash:"dot", shape:"spline", width:2 },
+      marker: { color:"#e5e7eb", size: baseSizesGap(years.length, latestIndex) },
+      hovertemplate: "Year %{x}<br>Gap: %{y:.0%}<extra></extra>"
+    };
+
+    const layout = {
+      font:{
+        color:"#e5e7eb",
+        family:"system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI'",
+        size:12
+      },
+      hovermode:"x unified",
+      legend:{ orientation:"h", x:0, y:1.05 },
+      margin:{ b:60, l:60, r:20, t:40 },
+      paper_bgcolor:"#020617",
+      plot_bgcolor:"#020617",
+      xaxis:{
+        dtick:4,
+        gridcolor:"#1f2933",
+        tickmode:"linear",
+        title:{ text:"Presidential election year" }
+      },
+      yaxis:{
+        dtick:0.1,          // 10 percentage points
+        gridcolor:"#1f2933",
+        range:[0.35,0.8],
+        tickformat:".0%",
+        title:{ text:"Turnout rate" }
+      },
+      shapes:[
+        {
+          type:"line",
+          xref:"x",
+          yref:"paper",
+          x0: years[latestIndex],
+          x1: years[latestIndex],
+          y0: 0,
+          y1: 1,
+          line:{
+            color:"rgba(148,163,184,0.6)",
+            width:1.5,
+            dash:"dot"
+          },
+          name:"year-cursor"
+        }
+      ]
+    };
+
+    const config = { responsive:true };
+
+    Plotly.newPlot("turnout-chart", [traceOver30, traceYoung, traceGap], layout, config).then(function(gd){
+      setupInteractions(gd);
+      setupScrollReveal();
+    });
+
+    // --- Interactions: slider, play button, hover sync ---
+    function setupInteractions(gd){
+      const slider = document.getElementById("year-slider");
+      const playButton = document.getElementById("play-button");
+      const selectedYearLabel = document.getElementById("selected-year-label");
+      let playing = false;
+      let timer = null;
+      let currentIndex = latestIndex;
+
+      function formatPct(v){
+        return Math.round(v * 100);
+      }
+
+      function updateNarrative(idx){
+        const year = years[idx];
+        const yYoung = turnout1829[idx];
+        const yOld = turnoutOver30[idx];
+        const g = gap[idx];
+
+        document.getElementById("detail-year").textContent = year;
+        document.getElementById("detail-young").textContent = formatPct(yYoung) + "%";
+        document.getElementById("detail-gap").textContent = formatPct(g) + " percentage points";
+        selectedYearLabel.textContent = year;
+      }
+
+      function updateMarkers(idx){
+        const sizeOver = baseSizes(years.length, idx);
+        const sizeYoung = baseSizes(years.length, idx);
+        const sizeGapArr = baseSizesGap(years.length, idx);
+
+        Plotly.restyle("turnout-chart",{ "marker.size":[sizeOver]}, [0]);
+        Plotly.restyle("turnout-chart",{ "marker.size":[sizeYoung]}, [1]);
+        Plotly.restyle("turnout-chart",{ "marker.size":[sizeGapArr]}, [2]);
+      }
+
+      function updateCursor(idx){
+        const year = years[idx];
+        const shapes = (gd.layout.shapes || []).filter(s => s.name !== "year-cursor");
+        shapes.push({
+          type:"line",
+          xref:"x",
+          yref:"paper",
+          x0:year,
+          x1:year,
+          y0:0,
+          y1:1,
+          line:{
+            color:"rgba(148,163,184,0.7)",
+            width:1.5,
+            dash:"dot"
+          },
+          name:"year-cursor"
+        });
+        Plotly.relayout("turnout-chart",{ shapes:shapes });
+      }
+
+      function setIndex(idx){
+        currentIndex = idx;
+        slider.value = idx;
+        updateNarrative(idx);
+        updateMarkers(idx);
+        updateCursor(idx);
+      }
+
+      // Initialise
+      slider.min = 0;
+      slider.max = years.length - 1;
+      slider.value = latestIndex;
+      setIndex(latestIndex);
+
+      slider.addEventListener("input", function(){
+        setIndex(parseInt(slider.value,10));
+      });
+
+      playButton.addEventListener("click", function(){
+        if(!playing){
+          playing = true;
+          playButton.textContent = "Pause timeline";
+          timer = setInterval(function(){
+            let next = currentIndex + 1;
+            if(next >= years.length){ next = 0; }
+            setIndex(next);
+          }, 900);
+        }else{
+          playing = false;
+          playButton.textContent = "Play timeline";
+          clearInterval(timer);
+        }
+      });
+
+      // Hover → sync slider + narrative
+      gd.on("plotly_hover", function(ev){
+        if(!ev.points || !ev.points.length) return;
+        const year = ev.points[0].x;
+        const idx = years.indexOf(year);
+        if(idx !== -1){
+          setIndex(idx);
+        }
+      });
+    }
+
+    // --- Scroll reveal for chart + context (light "Unfolded"-style motion) ---
+    function setupScrollReveal(){
+      const chartWrapper = document.getElementById("chart-wrapper");
+      const contextBox = document.getElementById("context-box");
+
+      const observer = new IntersectionObserver((entries)=>{
+        entries.forEach(entry=>{
+          if(entry.isIntersecting){
+            entry.target.classList.add("revealed");
+          }
+        });
+      }, { threshold:0.2 });
+
+      if(chartWrapper) observer.observe(chartWrapper);
+      if(contextBox) observer.observe(contextBox);
+    }
+  </script>
+</body>
+</html>
